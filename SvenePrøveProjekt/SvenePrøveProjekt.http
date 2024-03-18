@@ -1,0 +1,6 @@
+@SvenePrøveProjekt_HostAddress = http://localhost:5142
+
+GET {{SvenePrøveProjekt_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
