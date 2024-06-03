@@ -28,9 +28,17 @@ namespace SvenePrøveProjekt.Repositories
             return await _context.City.FirstOrDefaultAsync(x => x.CityID == cityId);
         }
 
-        public async Task<City> UpdateCity(City city, int cityId)
+        public async Task<City> UpdateCity(City updatecity, int cityId)
         {
-            throw new NotImplementedException();
+            City city = await GetCityById(cityId);
+            if (city != null && UpdateCity != null)
+            {
+                city.CityName = updatecity.CityName;
+                city.CityID = updatecity.CityID;
+
+                await _context.SaveChangesAsync();
+            }
+            return city;
         }
 
         public async Task<City> DeleteCity(int cityId)
