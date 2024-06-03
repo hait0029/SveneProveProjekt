@@ -1,0 +1,9 @@
+﻿global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;
+global using SvenePrøveProjekt.Database;
+global using Microsoft.EntityFrameworkCore;
+global using SvenePrøveProjekt.Models;
+global using SvenePrøveProjekt.Repositories;
+global using SvenePrøveProjekt.Interfaces;
+global using Microsoft.AspNetCore.Http;
+global using Microsoft.AspNetCore.Mvc;
