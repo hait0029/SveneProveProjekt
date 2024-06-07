@@ -43,7 +43,13 @@ namespace SvenePrøveProjekt.Repositories
 
         public async Task<City> DeleteCity(int cityId)
         {
-            throw new NotImplementedException();
+            City city = await GetCityById(cityId);
+            if (city != null)
+            {
+                _context.City.Remove(city);
+                await _context.SaveChangesAsync();
+            }
+            return city;
 
         }
     }
