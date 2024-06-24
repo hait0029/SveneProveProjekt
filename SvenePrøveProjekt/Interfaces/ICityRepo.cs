@@ -1,6 +1,4 @@
-﻿using SvenePrøveProjekt.Models;
-
-namespace SvenePrøveProjekt.Interfaces
+﻿namespace SvenePrøveProjekt.Interfaces
 {
     public interface ICityRepo
     {

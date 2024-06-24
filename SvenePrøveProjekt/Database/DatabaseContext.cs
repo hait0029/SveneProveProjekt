@@ -10,7 +10,12 @@ namespace SvenePrøveProjekt.Database
         public DbSet<User> User { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<City> City { get; set; }
-
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+        {
+            // Database.EnsureCreated() 
+            //Database.EnsureCreated
+            //Database.Migrate();
+        }
 
     }
 }
