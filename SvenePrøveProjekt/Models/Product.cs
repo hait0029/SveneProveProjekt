@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-
-namespace SvenePrøveProjekt.Models
+﻿namespace SvenePrøveProjekt.Models
 {
     public class Product
     {

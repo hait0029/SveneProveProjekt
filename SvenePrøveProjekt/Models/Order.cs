@@ -6,8 +6,8 @@ namespace SvenePrøveProjekt.Models
     public class Order
     {
         [Key]
-        int OrderID { get; set; } = 0; // primary key
-        DateTime OrderDate { get; set; } = DateTime.Now;
+        public int OrderID { get; set; } = 0; // primary key
+        public DateTime OrderDate { get; set; } = DateTime.Now;
 
         public int? UserId { get; set; } // Foreign key property
         public User? user { get; set; }  // Navigation property
