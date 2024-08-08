@@ -11,6 +11,12 @@ namespace SvenePrøveProjekt.Repositories
 
         public async Task<User> CreateUser(User newUser)
         {
+
+            if(newUser.LoginId.HasValue)
+            {
+                newUser.login = await _context.Login.FirstOrDefaultAsync(e => e.LoginID == newUser.LoginId);
+            }
+
             _context.User.Add(newUser);
             await _context.SaveChangesAsync();
             return newUser;

@@ -12,8 +12,8 @@ using SvenePrøveProjekt.Database;
 namespace SvenePrøveProjekt.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240621085125_initialCreate")]
-    partial class initialCreate
+    [Migration("20240802060940_Initialcreate")]
+    partial class Initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -183,9 +183,8 @@ namespace SvenePrøveProjekt.Migrations
                     b.Property<int?>("LoginId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PhoneNr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PhoneNr")
+                        .HasColumnType("int");
 
                     b.Property<int?>("RoleTypeRoleID")
                         .HasColumnType("int");

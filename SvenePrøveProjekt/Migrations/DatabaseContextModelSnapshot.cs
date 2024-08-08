@@ -180,9 +180,8 @@ namespace SvenePrøveProjekt.Migrations
                     b.Property<int?>("LoginId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PhoneNr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PhoneNr")
+                        .HasColumnType("int");
 
                     b.Property<int?>("RoleTypeRoleID")
                         .HasColumnType("int");

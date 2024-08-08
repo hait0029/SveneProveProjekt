@@ -9,7 +9,7 @@ namespace SvenePrøveProjekt.Models
         public int UserID { get; set; } = 0;
         public string FName { get; set; } = string.Empty;
         public string LName { get; set; } = string.Empty;
-        public string PhoneNr { get; set; } = string.Empty;
+        public int PhoneNr { get; set; } = 0;
         public string Address { get; set; } = string.Empty;
         public int? LoginId { get; set; } // Foreign key property
         public Login? login { get; set; }// 1 til 1 relation aka Navigation property

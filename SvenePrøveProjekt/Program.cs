@@ -14,6 +14,13 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ICityRepo, CityRepo>();
+builder.Services.AddScoped<ILoginRepo, LoginRepo>();
+builder.Services.AddScoped<IOrderRepo, OrderRepo>();
+builder.Services.AddScoped<IProductRepo, ProductRepo>();
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<IProductListRepo, ProductListRepo>();
+builder.Services.AddScoped<IRoleRepo, RoleRepo>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
