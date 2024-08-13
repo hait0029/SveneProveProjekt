@@ -1,4 +1,6 @@
 ﻿
+using SvenePrøveProjekt.Models;
+
 namespace SvenePrøveProjekt.Repositories
 {
     public class ProductListRepo : IProductListRepo
@@ -10,8 +12,19 @@ namespace SvenePrøveProjekt.Repositories
         }
         public async Task<ProductList> CreateProductOrderList(ProductList newProductOrderList)
         {
+      
+            if (newProductOrderList.ProductId.HasValue)
+            {
+                newProductOrderList.Products = await _context.Product.FirstOrDefaultAsync(e => e.ProductID == newProductOrderList.ProductId);
+            }
+            else if (newProductOrderList.OrderId.HasValue)
+            {
+                newProductOrderList.Orders = await _context.Order.FirstOrDefaultAsync(e => e.OrderID == newProductOrderList.OrderId);
+            }
+
             _context.ProductList.Add(newProductOrderList);
             await _context.SaveChangesAsync();
+
             return newProductOrderList;
         }
 
@@ -33,6 +46,26 @@ namespace SvenePrøveProjekt.Repositories
             {
                 productList.ProductOrderListID = updateProductOrderList.ProductOrderListID;
                 productList.Quantity = updateProductOrderList.Quantity;
+
+                if (updateProductOrderList.Products != null)
+                {
+                    productList.Products = await _context.Product.FirstOrDefaultAsync(e => e.ProductID == updateProductOrderList.Products.ProductID);
+                }
+
+                else
+                {
+                    productList.Products = null;
+                }
+
+                if (updateProductOrderList.Orders != null)
+                {
+                    productList.Orders = await _context.Order.FirstOrDefaultAsync(e => e.OrderID == updateProductOrderList.Orders.OrderID);
+                }
+
+                else
+                {
+                    productList.Orders = null;
+                }
 
                 await _context.SaveChangesAsync();
             }

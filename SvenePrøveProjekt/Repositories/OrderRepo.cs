@@ -12,6 +12,15 @@ namespace SvenePrøveProjekt.Repositories
         }
         public async Task<Order> CreateOrder(Order newOrder)
         {
+            //This method checks if the our loginid property has a value, it also allows our value to be nullable
+            if (newOrder.UserId.HasValue)
+            {
+                // This line asynchronously queries the Login table in the database to find the first record where the LoginID matches newUser.LoginId. If a match is found, it assigns the result to newUser.login.
+
+                //FirstOrDefaultAsync returns the first element that satisfies the condition specified by the lambda expression or null if no such element is found.
+                newOrder.user = await _context.User.FirstOrDefaultAsync(e => e.UserID == newOrder.UserId);
+            }
+          
             _context.Order.Add(newOrder);
             await _context.SaveChangesAsync();
             return newOrder;
@@ -37,7 +46,20 @@ namespace SvenePrøveProjekt.Repositories
 
                 await _context.SaveChangesAsync();
             }
-            return order;
+            if (updateOrder.user != null)
+            {
+                order.user = await _context.User.FirstOrDefaultAsync(e => e.UserID == updateOrder.user.UserID);
+
+            }
+            else
+            {
+                order.user = null;
+            }
+
+            _context.Entry(order).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+            return await GetOrderById(orderId);
         }
         public async Task<Order> DeleteOrder(int orderId)
         {
