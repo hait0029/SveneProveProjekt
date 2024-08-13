@@ -34,15 +34,10 @@ namespace SvenePrøveProjekt.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserID")
-                        .HasColumnType("int");
-
                     b.Property<int>("ZIPCode")
                         .HasColumnType("int");
 
                     b.HasKey("CityID");
-
-                    b.HasIndex("UserID");
 
                     b.ToTable("City");
                 });
@@ -169,6 +164,9 @@ namespace SvenePrøveProjekt.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CityId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -188,6 +186,10 @@ namespace SvenePrøveProjekt.Migrations
 
                     b.HasKey("UserID");
 
+                    b.HasIndex("CityId")
+                        .IsUnique()
+                        .HasFilter("[CityId] IS NOT NULL");
+
                     b.HasIndex("LoginId")
                         .IsUnique()
                         .HasFilter("[LoginId] IS NOT NULL");
@@ -195,13 +197,6 @@ namespace SvenePrøveProjekt.Migrations
                     b.HasIndex("RoleTypeRoleID");
 
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("SvenePrøveProjekt.Models.City", b =>
-                {
-                    b.HasOne("SvenePrøveProjekt.Models.User", null)
-                        .WithMany("Cities")
-                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.Login", b =>
@@ -239,6 +234,10 @@ namespace SvenePrøveProjekt.Migrations
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.User", b =>
                 {
+                    b.HasOne("SvenePrøveProjekt.Models.City", "cities")
+                        .WithOne("Users")
+                        .HasForeignKey("SvenePrøveProjekt.Models.User", "CityId");
+
                     b.HasOne("SvenePrøveProjekt.Models.Login", "login")
                         .WithOne("Users")
                         .HasForeignKey("SvenePrøveProjekt.Models.User", "LoginId");
@@ -249,7 +248,14 @@ namespace SvenePrøveProjekt.Migrations
 
                     b.Navigation("RoleType");
 
+                    b.Navigation("cities");
+
                     b.Navigation("login");
+                });
+
+            modelBuilder.Entity("SvenePrøveProjekt.Models.City", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.Login", b =>
@@ -274,8 +280,6 @@ namespace SvenePrøveProjekt.Migrations
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.User", b =>
                 {
-                    b.Navigation("Cities");
-
                     b.Navigation("order");
                 });
 #pragma warning restore 612, 618

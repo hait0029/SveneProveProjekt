@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SvenePrøveProjekt.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialcreate : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "City",
+                columns: table => new
+                {
+                    CityID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CityName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ZIPCode = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_City", x => x.CityID);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Product",
                 columns: table => new
@@ -69,11 +83,17 @@ namespace SvenePrøveProjekt.Migrations
                     PhoneNr = table.Column<int>(type: "int", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoginId = table.Column<int>(type: "int", nullable: true),
+                    CityId = table.Column<int>(type: "int", nullable: true),
                     RoleTypeRoleID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_User", x => x.UserID);
+                    table.ForeignKey(
+                        name: "FK_User_City_CityId",
+                        column: x => x.CityId,
+                        principalTable: "City",
+                        principalColumn: "CityID");
                     table.ForeignKey(
                         name: "FK_User_Login_LoginId",
                         column: x => x.LoginId,
@@ -84,26 +104,6 @@ namespace SvenePrøveProjekt.Migrations
                         column: x => x.RoleTypeRoleID,
                         principalTable: "Role",
                         principalColumn: "RoleID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "City",
-                columns: table => new
-                {
-                    CityID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CityName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ZIPCode = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_City", x => x.CityID);
-                    table.ForeignKey(
-                        name: "FK_City_User_UserID",
-                        column: x => x.UserID,
-                        principalTable: "User",
-                        principalColumn: "UserID");
                 });
 
             migrationBuilder.CreateTable(
@@ -151,11 +151,6 @@ namespace SvenePrøveProjekt.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_City_UserID",
-                table: "City",
-                column: "UserID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Login_RoleId",
                 table: "Login",
                 column: "RoleId");
@@ -176,6 +171,13 @@ namespace SvenePrøveProjekt.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_User_CityId",
+                table: "User",
+                column: "CityId",
+                unique: true,
+                filter: "[CityId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_User_LoginId",
                 table: "User",
                 column: "LoginId",
@@ -192,9 +194,6 @@ namespace SvenePrøveProjekt.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "City");
-
-            migrationBuilder.DropTable(
                 name: "ProductList");
 
             migrationBuilder.DropTable(
@@ -205,6 +204,9 @@ namespace SvenePrøveProjekt.Migrations
 
             migrationBuilder.DropTable(
                 name: "User");
+
+            migrationBuilder.DropTable(
+                name: "City");
 
             migrationBuilder.DropTable(
                 name: "Login");
