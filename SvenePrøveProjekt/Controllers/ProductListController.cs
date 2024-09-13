@@ -51,7 +51,7 @@ namespace SvenePrøveProjekt.Controllers
         }
 
         //Update Method
-        [HttpPut("{cityId}")]
+        [HttpPut("{productlistId}")]
         public async Task<ActionResult> PutProductlist(int productlistId, ProductList productlist)
         {
             try
@@ -84,7 +84,7 @@ namespace SvenePrøveProjekt.Controllers
                 {
                     return StatusCode(500, "productList was not created. Something failed...");
                 }
-                return CreatedAtAction("PostProductList", new { productId = createProductList.ProductId }, createProductList);
+                return CreatedAtAction("PostProductList", new { productlistId = createProductList.ProductOrderListID }, createProductList);
             }
             catch (Exception ex)
             {

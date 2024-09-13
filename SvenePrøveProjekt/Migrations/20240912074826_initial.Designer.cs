@@ -12,7 +12,7 @@ using SvenePrøveProjekt.Database;
 namespace SvenePrøveProjekt.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240812090409_initial")]
+    [Migration("20240912074826_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -24,6 +24,23 @@ namespace SvenePrøveProjekt.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("SvenePrøveProjekt.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CategoryID");
+
+                    b.ToTable("Category");
+                });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.City", b =>
                 {
@@ -100,14 +117,19 @@ namespace SvenePrøveProjekt.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductID"));
 
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
 
                     b.HasKey("ProductID");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Product");
                 });
@@ -220,6 +242,15 @@ namespace SvenePrøveProjekt.Migrations
                     b.Navigation("user");
                 });
 
+            modelBuilder.Entity("SvenePrøveProjekt.Models.Product", b =>
+                {
+                    b.HasOne("SvenePrøveProjekt.Models.Category", "category")
+                        .WithMany("product")
+                        .HasForeignKey("CategoryId");
+
+                    b.Navigation("category");
+                });
+
             modelBuilder.Entity("SvenePrøveProjekt.Models.ProductList", b =>
                 {
                     b.HasOne("SvenePrøveProjekt.Models.Order", "Orders")
@@ -254,6 +285,11 @@ namespace SvenePrøveProjekt.Migrations
                     b.Navigation("cities");
 
                     b.Navigation("login");
+                });
+
+            modelBuilder.Entity("SvenePrøveProjekt.Models.Category", b =>
+                {
+                    b.Navigation("product");
                 });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.City", b =>
