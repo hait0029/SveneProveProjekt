@@ -1,28 +1,41 @@
-﻿
-using SvenePrøveProjekt.Models;
+﻿using SvenePrøveProjekt.Models;
 
 namespace SvenePrøveProjekt.Repositories
 {
     public class OrderRepo : IOrderRepo
     {
         private DatabaseContext _context { get; set; }
-        public OrderRepo(DatabaseContext context)
+        private IProductListRepo _productListRepo { get; set; }  // Add this to handle ProductList operations
+
+        public OrderRepo(DatabaseContext context, IProductListRepo productListRepo)
         {
             _context = context;
+            _productListRepo = productListRepo;
         }
+
         public async Task<Order> CreateOrder(Order newOrder)
         {
-            //This method checks if the our loginid property has a value, it also allows our value to be nullable
+            // Check if UserId has a value and assign the User object accordingly
             if (newOrder.UserId.HasValue)
             {
-                // This line asynchronously queries the Login table in the database to find the first record where the LoginID matches newUser.LoginId. If a match is found, it assigns the result to newUser.login.
-
-                //FirstOrDefaultAsync returns the first element that satisfies the condition specified by the lambda expression or null if no such element is found.
                 newOrder.user = await _context.User.FirstOrDefaultAsync(e => e.UserID == newOrder.UserId);
             }
-          
+
+
+            // Add the order to the database
             _context.Order.Add(newOrder);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // Save changes to get the OrderID
+
+            // Add associated ProductList entries
+            if (newOrder.orderlists != null && newOrder.orderlists.Count > 0)
+            {
+                foreach (var productListItem in newOrder.orderlists)
+                {
+                    productListItem.OrderId = newOrder.OrderID; // Set the OrderID to the created order
+                    await _productListRepo.CreateProductOrderList(productListItem);
+                }
+            }
+
             return newOrder;
         }
 
@@ -44,23 +57,22 @@ namespace SvenePrøveProjekt.Repositories
                 order.OrderID = updateOrder.OrderID;
                 order.OrderDate = updateOrder.OrderDate;
 
+                // Update User
+                if (updateOrder.user != null)
+                {
+                    order.user = await _context.User.FirstOrDefaultAsync(e => e.UserID == updateOrder.user.UserID);
+                }
+                else
+                {
+                    order.user = null;
+                }
+
+                _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
-            if (updateOrder.user != null)
-            {
-                order.user = await _context.User.FirstOrDefaultAsync(e => e.UserID == updateOrder.user.UserID);
-
-            }
-            else
-            {
-                order.user = null;
-            }
-
-            _context.Entry(order).State = EntityState.Modified;
-
-            await _context.SaveChangesAsync();
             return await GetOrderById(orderId);
         }
+
         public async Task<Order> DeleteOrder(int orderId)
         {
             Order order = await GetOrderById(orderId);

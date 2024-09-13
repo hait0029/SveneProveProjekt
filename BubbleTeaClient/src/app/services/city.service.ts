@@ -8,7 +8,7 @@ import { City } from '../models/City';
   providedIn: 'root'
 })
 export class CityService {
-  private apiUrl= environment.apiurl + "City";
+  private apiUrl= environment.apiurl + 'City';
   constructor(private http: HttpClient) { }
 
   getAll():Observable<City[]>{
