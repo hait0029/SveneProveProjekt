@@ -7,9 +7,9 @@ namespace SvenePrøveProjekt.Models
         [Key]
         public int ProductOrderListID { get; set; } = 0;
         public int Quantity { get; set; } = 0;
-        public int? ProductId { get; set; }
-        public Product? Products { get; set; }
         public int? OrderId { get; set; }
         public Order? Orders { get; set; }
+        public int? ProductId { get; set; }
+        public Product? Products { get; set; }
     }
 }
