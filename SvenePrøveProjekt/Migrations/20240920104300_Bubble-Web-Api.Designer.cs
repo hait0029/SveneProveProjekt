@@ -12,8 +12,8 @@ using SvenePrøveProjekt.Database;
 namespace SvenePrøveProjekt.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240912074826_initial")]
-    partial class initial
+    [Migration("20240920104300_Bubble-Web-Api")]
+    partial class BubbleWebApi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
