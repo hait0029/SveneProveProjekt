@@ -13,7 +13,7 @@ namespace SvenePrøveProjekt.Database
         public DbSet<Category> Category { get; set; }
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
-            // Database.EnsureCreated() 
+            //Database.EnsureCreated(); 
             //Database.EnsureCreated
             //Database.Migrate();
         }
