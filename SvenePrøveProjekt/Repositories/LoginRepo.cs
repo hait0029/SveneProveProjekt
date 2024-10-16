@@ -1,16 +1,80 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
-using SvenePrøveProjekt.Models;
-
 namespace SvenePrøveProjekt.Repositories
 {
     public class LoginRepo : ILoginRepo
     {
         private DatabaseContext _context { get; set; }
-        public LoginRepo(DatabaseContext context)
+        private IConfiguration _configuration; // For accessing JWT settings
+
+        public LoginRepo(DatabaseContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
+
+        public async Task<Login?> GetLoginByEmailAsync(string email)
+        {
+            return await _context.Login.Include(l => l.RoleType)
+                                        .FirstOrDefaultAsync(l => l.Email == email);
+        }
+
+        public async Task<string?> AuthenticateAsync(string email, string password)
+        {
+            var user = await GetLoginByEmailAsync(email);
+
+            if (user == null || !VerifyPassword(password, user.Password))
+                return null;
+
+            return GenerateJwtToken(user);
+        }
+
+        // Method to add a new login
+        public async Task AddLoginAsync(Login login)
+        {
+            await _context.Login.AddAsync(login);
+            await _context.SaveChangesAsync();
+        }
+
+
+        // Method to update an existing login
+        public async Task UpdateLoginAsync(Login login)
+        {
+            _context.Login.Update(login);
+            await _context.SaveChangesAsync();
+        }
+
+
+        // Private method to generate the JWT token
+        private string GenerateJwtToken(Login user)
+        {
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var claims = new[]
+            {
+            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Role, user.RoleType?.RoleType ?? "User")
+        };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        // Private method to verify the password hash
+        private bool VerifyPassword(string password, string storedHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, storedHash);
+        }
+
+
+
+
 
         public async Task<Login> CreateLogin(Login newLogin)
         {
@@ -81,5 +145,7 @@ namespace SvenePrøveProjekt.Repositories
             }
             return login;
         }
+
+
     }
 }

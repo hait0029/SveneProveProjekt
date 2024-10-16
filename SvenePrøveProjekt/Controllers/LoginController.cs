@@ -14,6 +14,34 @@ namespace SvenePrøveProjekt.Controllers
             _loginrepo = temp;
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] Login logins)
+        {
+            var token = await _loginrepo.AuthenticateAsync(logins.Email, logins.Password);
+            if (token == null)
+                return Unauthorized();
+
+            return Ok(new { Token = token });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] Login registerLog)
+        {
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerLog.Password);
+            var login = new Login
+            {
+                Email = registerLog.Email,
+                Password = hashedPassword,
+                RoleId = registerLog.RoleId
+            };
+
+            await _loginrepo.AddLoginAsync(login);
+            return Ok();
+        }
+
+
+
+
         [HttpGet]
         public async Task<ActionResult> GetLogins()
         {

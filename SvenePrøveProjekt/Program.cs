@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure the database context with SQL Server
@@ -21,15 +26,33 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
+// Configure CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DarthVader",
-        builder =>
-        {
-            builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-        });
+    options.AddPolicy("DarthVader", builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
 });
 
+// Add JWT authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+            ValidateIssuer = false, // Set to true if you want to validate the issuer
+            ValidateAudience = false, // Set to true if you want to validate the audience
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero // Optional: To make sure token expiration is accurate
+        };
+    });
+
+// Build the app
 var app = builder.Build();
 
 // Apply migrations and seed the database
@@ -58,6 +81,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("DarthVader");
+
+// Add the authentication middleware
+app.UseAuthentication(); // <-- This middleware ensures authentication happens
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();
