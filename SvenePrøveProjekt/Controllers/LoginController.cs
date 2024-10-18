@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SvenePrøveProjekt.Models;
-
-namespace SvenePrøveProjekt.Controllers
+﻿namespace SvenePrøveProjekt.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

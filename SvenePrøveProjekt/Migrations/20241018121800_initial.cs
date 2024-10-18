@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SvenePrøveProjekt.Migrations
 {
     /// <inheritdoc />
-    public partial class BubbleWebApi : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,20 +25,6 @@ namespace SvenePrøveProjekt.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "City",
-                columns: table => new
-                {
-                    CityID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CityName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ZIPCode = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_City", x => x.CityID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Role",
                 columns: table => new
                 {
@@ -49,6 +35,24 @@ namespace SvenePrøveProjekt.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Role", x => x.RoleID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "User",
+                columns: table => new
+                {
+                    UserID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNr = table.Column<int>(type: "int", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_User", x => x.UserID);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,6 +76,26 @@ namespace SvenePrøveProjekt.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "City",
+                columns: table => new
+                {
+                    CityID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CityName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ZIPCode = table.Column<int>(type: "int", nullable: false),
+                    UsersUserID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_City", x => x.CityID);
+                    table.ForeignKey(
+                        name: "FK_City_User_UsersUserID",
+                        column: x => x.UsersUserID,
+                        principalTable: "User",
+                        principalColumn: "UserID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Login",
                 columns: table => new
                 {
@@ -79,7 +103,8 @@ namespace SvenePrøveProjekt.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: true)
+                    RoleId = table.Column<int>(type: "int", nullable: true),
+                    UsersUserID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -89,40 +114,11 @@ namespace SvenePrøveProjekt.Migrations
                         column: x => x.RoleId,
                         principalTable: "Role",
                         principalColumn: "RoleID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "User",
-                columns: table => new
-                {
-                    UserID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNr = table.Column<int>(type: "int", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LoginId = table.Column<int>(type: "int", nullable: true),
-                    CityId = table.Column<int>(type: "int", nullable: true),
-                    RoleTypeRoleID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_User", x => x.UserID);
                     table.ForeignKey(
-                        name: "FK_User_City_CityId",
-                        column: x => x.CityId,
-                        principalTable: "City",
-                        principalColumn: "CityID");
-                    table.ForeignKey(
-                        name: "FK_User_Login_LoginId",
-                        column: x => x.LoginId,
-                        principalTable: "Login",
-                        principalColumn: "LoginID");
-                    table.ForeignKey(
-                        name: "FK_User_Role_RoleTypeRoleID",
-                        column: x => x.RoleTypeRoleID,
-                        principalTable: "Role",
-                        principalColumn: "RoleID");
+                        name: "FK_Login_User_UsersUserID",
+                        column: x => x.UsersUserID,
+                        principalTable: "User",
+                        principalColumn: "UserID");
                 });
 
             migrationBuilder.CreateTable(
@@ -170,9 +166,19 @@ namespace SvenePrøveProjekt.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_City_UsersUserID",
+                table: "City",
+                column: "UsersUserID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Login_RoleId",
                 table: "Login",
                 column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Login_UsersUserID",
+                table: "Login",
+                column: "UsersUserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Order_UserId",
@@ -193,32 +199,22 @@ namespace SvenePrøveProjekt.Migrations
                 name: "IX_ProductList_ProductId",
                 table: "ProductList",
                 column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_User_CityId",
-                table: "User",
-                column: "CityId",
-                unique: true,
-                filter: "[CityId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_User_LoginId",
-                table: "User",
-                column: "LoginId",
-                unique: true,
-                filter: "[LoginId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_User_RoleTypeRoleID",
-                table: "User",
-                column: "RoleTypeRoleID");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "City");
+
+            migrationBuilder.DropTable(
+                name: "Login");
+
+            migrationBuilder.DropTable(
                 name: "ProductList");
+
+            migrationBuilder.DropTable(
+                name: "Role");
 
             migrationBuilder.DropTable(
                 name: "Order");
@@ -231,15 +227,6 @@ namespace SvenePrøveProjekt.Migrations
 
             migrationBuilder.DropTable(
                 name: "Category");
-
-            migrationBuilder.DropTable(
-                name: "City");
-
-            migrationBuilder.DropTable(
-                name: "Login");
-
-            migrationBuilder.DropTable(
-                name: "Role");
         }
     }
 }

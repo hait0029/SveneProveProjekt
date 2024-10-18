@@ -51,10 +51,15 @@ namespace SvenePrøveProjekt.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("UsersUserID")
+                        .HasColumnType("int");
+
                     b.Property<int>("ZIPCode")
                         .HasColumnType("int");
 
                     b.HasKey("CityID");
+
+                    b.HasIndex("UsersUserID");
 
                     b.ToTable("City");
                 });
@@ -78,9 +83,14 @@ namespace SvenePrøveProjekt.Migrations
                     b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UsersUserID")
+                        .HasColumnType("int");
+
                     b.HasKey("LoginID");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("UsersUserID");
 
                     b.ToTable("Login");
                 });
@@ -186,8 +196,9 @@ namespace SvenePrøveProjekt.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CityId")
-                        .HasColumnType("int");
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FName")
                         .IsRequired()
@@ -197,28 +208,25 @@ namespace SvenePrøveProjekt.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("LoginId")
-                        .HasColumnType("int");
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PhoneNr")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RoleTypeRoleID")
-                        .HasColumnType("int");
-
                     b.HasKey("UserID");
 
-                    b.HasIndex("CityId")
-                        .IsUnique()
-                        .HasFilter("[CityId] IS NOT NULL");
-
-                    b.HasIndex("LoginId")
-                        .IsUnique()
-                        .HasFilter("[LoginId] IS NOT NULL");
-
-                    b.HasIndex("RoleTypeRoleID");
-
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("SvenePrøveProjekt.Models.City", b =>
+                {
+                    b.HasOne("SvenePrøveProjekt.Models.User", "Users")
+                        .WithMany()
+                        .HasForeignKey("UsersUserID");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.Login", b =>
@@ -227,7 +235,13 @@ namespace SvenePrøveProjekt.Migrations
                         .WithMany("logins")
                         .HasForeignKey("RoleId");
 
+                    b.HasOne("SvenePrøveProjekt.Models.User", "Users")
+                        .WithMany()
+                        .HasForeignKey("UsersUserID");
+
                     b.Navigation("RoleType");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.Order", b =>
@@ -263,40 +277,9 @@ namespace SvenePrøveProjekt.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("SvenePrøveProjekt.Models.User", b =>
-                {
-                    b.HasOne("SvenePrøveProjekt.Models.City", "cities")
-                        .WithOne("Users")
-                        .HasForeignKey("SvenePrøveProjekt.Models.User", "CityId");
-
-                    b.HasOne("SvenePrøveProjekt.Models.Login", "login")
-                        .WithOne("Users")
-                        .HasForeignKey("SvenePrøveProjekt.Models.User", "LoginId");
-
-                    b.HasOne("SvenePrøveProjekt.Models.Role", "RoleType")
-                        .WithMany()
-                        .HasForeignKey("RoleTypeRoleID");
-
-                    b.Navigation("RoleType");
-
-                    b.Navigation("cities");
-
-                    b.Navigation("login");
-                });
-
             modelBuilder.Entity("SvenePrøveProjekt.Models.Category", b =>
                 {
                     b.Navigation("product");
-                });
-
-            modelBuilder.Entity("SvenePrøveProjekt.Models.City", b =>
-                {
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("SvenePrøveProjekt.Models.Login", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SvenePrøveProjekt.Models.Order", b =>
