@@ -3,29 +3,101 @@ namespace SvenePrøveProjekt.Repositories
 {
     public class UserRepo : IUserRepo
     {
-        private DatabaseContext _context;
-        public UserRepo(DatabaseContext context)
+        private DatabaseContext _context { get; set; }
+        private IConfiguration _configuration; // For accessing JWT settings
+
+        public UserRepo(DatabaseContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
+
+
+        public async Task<User?> GetLoginByEmailAsync(string email)
+        {
+            return await _context.User.FirstOrDefaultAsync(l => l.Email == email);
+        }
+
+        public async Task<string?> AuthenticateAsync(string email, string password)
+        {
+            var user = await GetLoginByEmailAsync(email);
+
+            if (user == null || !VerifyPassword(password, user.Password))
+                return null;
+
+            return GenerateJwtToken(user);
+        }
+
+        // Method to add a new login
+        public async Task AddLoginAsync(User login)
+        {
+            await _context.User.AddAsync(login);
+            await _context.SaveChangesAsync();
+        }
+
+
+        // Method to update an existing login
+        public async Task UpdateLoginAsync(User login)
+        {
+            _context.User.Update(login);
+            await _context.SaveChangesAsync();
+        }
+        // Private method to generate the JWT token
+        private string GenerateJwtToken(User user)
+        {
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var claims = new List<Claim>
+            {
+            new Claim(ClaimTypes.Name, user.Email), // User's email as the identity
+            new Claim("FirstName", user.FName),     // Custom claim for first name
+            new Claim("LastName", user.LName),      // Custom claim for last name
+            new Claim("PhoneNr", user.PhoneNr.ToString()), // Phone number as a custom claim
+            new Claim("Address", user.Address)      // Address as a custom claim
+        };
+    
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        // Private method to verify the password hash
+        private bool VerifyPassword(string password, string storedHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, storedHash);
+        }
+
+        public async Task<User> CreateLogin(User newLogin)
+        {
+            var existingLogin = await _context.Login.FirstOrDefaultAsync(e => e.Email == newLogin.Email);
+
+            if (existingLogin != null)
+            {
+                throw new ArgumentException("Login already exists", nameof(newLogin.Email));
+            }
+
+            _context.User.Add(newLogin);
+            await _context.SaveChangesAsync();
+
+            return newLogin;
+        }
+
+
+
+
+
+
 
         public async Task<User> CreateUser(User newUser)
         {
-            //This method checks if the our loginid property has a value, it also allows our value to be nullable
-            if (newUser.LoginId.HasValue)
-            {
-                // This line asynchronously queries the Login table in the database to find the first record where the LoginID matches newUser.LoginId. If a match is found, it assigns the result to newUser.login.
-
-                //FirstOrDefaultAsync returns the first element that satisfies the condition specified by the lambda expression or null if no such element is found.
-                newUser.login = await _context.Login.FirstOrDefaultAsync(e => e.LoginID == newUser.LoginId);
-            }
-            // Check if CityId has a value
-            else if (newUser.CityId.HasValue)
-            {
-                // Asynchronously fetch the City entity associated with the CityId
-                newUser.cities = await _context.City.FirstOrDefaultAsync(c => c.CityID == newUser.CityId);
-
-            }
+        
             _context.User.Add(newUser);
             await _context.SaveChangesAsync();
             return newUser;
@@ -37,7 +109,7 @@ namespace SvenePrøveProjekt.Repositories
         {
             //return await _context.User.ToListAsync();
 
-            return await _context.User.Include(e => e.login).Include(x => x.cities).ToListAsync();
+            return await _context.User.ToListAsync();
 
 
         }
@@ -59,25 +131,7 @@ namespace SvenePrøveProjekt.Repositories
                 user.Address = updateUser.Address;
             }
 
-            if (updateUser.login != null)
-            {
-                user.login = await _context.Login.FirstOrDefaultAsync(e => e.LoginID == updateUser.login.LoginID);
-            }
-
-            else 
-            {
-                user.login = null;
-            }
-
-            if (updateUser.cities != null) 
-            {
-                user.cities = await _context.City.FirstOrDefaultAsync(e => e.CityID == updateUser.cities.CityID);
-
-            }
-            else
-            {
-                user.cities = null;
-            }
+           
 
             _context.Entry(user).State = EntityState.Modified;
 

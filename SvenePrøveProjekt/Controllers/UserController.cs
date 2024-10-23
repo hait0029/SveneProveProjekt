@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SvenePrøveProjekt.Models;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace SvenePrøveProjekt.Controllers
 {
@@ -9,11 +7,78 @@ namespace SvenePrøveProjekt.Controllers
     public class UserController : ControllerBase
     {
         private IUserRepo _userRepo;
-        public UserController(IUserRepo temp)
+        private readonly DatabaseContext _context;
+
+        public UserController(IUserRepo temp, DatabaseContext context)
         {
             _userRepo = temp;
+            _context = context;
 
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] User logins)
+        {
+            var token = await _userRepo.AuthenticateAsync(logins.Email, logins.Password);
+            if (token == null)
+                return Unauthorized(new { message = "Invalid email or password" });
+
+            return Ok(new { Token = token });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] User registerLog)
+        {
+            try
+            {
+                // Check if email already exists
+                var existingUser = await _context.User.FirstOrDefaultAsync(l => l.Email == registerLog.Email);
+                if (existingUser != null)
+                {
+                    return BadRequest("User already exists");
+                }
+
+            
+
+                // Hash Password
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerLog.Password);
+
+                // Create new user object using only CityId
+                var newUser = new User
+                {
+                    Email = registerLog.Email,
+                    Password = hashedPassword,
+                    FName = registerLog.FName,
+                    LName = registerLog.LName,
+                    PhoneNr = registerLog.PhoneNr,
+                    Address = registerLog.Address,
+
+                };
+
+                // Create user in the repository
+                var createdUser = await _userRepo.CreateUser(newUser);
+
+                if (createdUser == null)
+                {
+                    return StatusCode(500, "User was not created. Something failed...");
+                }
+
+                return CreatedAtAction("Register", new { userId = createdUser.UserID }, createdUser);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while creating the User: {ex.Message}");
+            }
+        }
+
+
+
+
+
+
+
+
+
         [HttpGet]
         public async Task<ActionResult> getUsers()
         {
